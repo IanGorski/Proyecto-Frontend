@@ -49,6 +49,7 @@ const RegisterScreen = () => {
         onRegister
     )
 
+    console.log(response, loading, error)
 
     return (
         <div>
