@@ -65,3 +65,31 @@ export async function login (email, password){
         throw new Error('Error interno del servidor')
     }
 }
+
+export async function inviteUserToWorkspace(email_invited, id_workspace, id_inviter, invited_role) {
+  const user = await UserRepository.getByEmail(email_invited);
+
+  if (!user) {
+    throw createError(404, `El usuario con el email ${email_invited} no existe.`);
+  }
+
+  // Verificar que el usuario no esté ya en el workspace usando el repositorio
+  const isMember = await WorkspaceRepository.isMember(id_workspace, user.id);
+
+  if (isMember) {
+    throw createError(400, `El usuario con el email ${email_invited} ya es miembro del workspace.`);
+  }
+
+  // Usar el repositorio para manejar la lógica de generación de token
+  const token = await WorkspaceRepository.generateInviteToken({
+    id_invited: user.id,
+    id_inviter,
+    id_workspace,
+    invited_role
+  });
+
+  return {
+    message: `Usuario ${email_invited} invitado correctamente.`,
+    token
+  };
+}
